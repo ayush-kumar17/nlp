@@ -1,0 +1,7 @@
+data/
+venv/
+task1_report.docx
+outputs/cooccurrence_w10.pkl
+outputs/glove_embeddings_*.npy
+outputs/loss_histories.pkl
+outputs/training_summary.pkl

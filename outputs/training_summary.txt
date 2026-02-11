@@ -1,0 +1,40 @@
+GloVe training results
+
+Configuration:
+Window size: 10
+Learning rate: 0.05
+Training iterations: 50
+X_max: 100, Alpha: 0.75
+Embedding dimensions: [50, 100, 200, 300]
+Documents: 67,093
+Vocabulary: 25,013
+
+Training Results:
+Dimension    Training Time        Final Loss     
+d=50        161.6 min            0.168158       
+d=100       162.2 min            0.139498       
+d=200       161.1 min            0.107221       
+d=300       178.1 min            0.084730       
+
+Nearest Neighbors (d=200):
+
+Word: 'economy'
+  1. global               (0.4832)
+  2. growth               (0.4637)
+  3. economies            (0.4541)
+  4. employers            (0.4492)
+  5. grow                 (0.4453)
+
+Word: 'president'
+  1. vice                 (0.7295)
+  2. minister             (0.6151)
+  3. former               (0.6015)
+  4. said                 (0.5761)
+  5. who                  (0.5498)
+
+Word: 'running'
+  1. newspaper            (0.4595)
+  2. just                 (0.4557)
+  3. build                (0.4458)
+  4. started              (0.4446)
+  5. he                   (0.4429)
