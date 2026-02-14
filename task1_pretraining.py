@@ -34,7 +34,7 @@ word_to_idx = {w: i for i, w in enumerate(vocab)}
 print(f"Vocab size: {len(vocab)}")
 
 def tokenize(text):
-    return re.findall(r"\b\w+\b", text.lower())
+    return re.findall(r"\b\w+\b", text)
 
 def get_documents(vocab_data, max_docs):
     docs= defaultdict(list)
