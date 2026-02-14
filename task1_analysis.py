@@ -6,23 +6,22 @@ import os
 import matplotlib.pyplot as plt
 from sklearn.metrics.pairwise import cosine_similarity
 
-DATA_DIR = "data"
-OUTPUT_DIR = "outputs"
+DATA_DIR="data"
+OUTPUT_DIR="outputs"
 
-EMBEDDING_DIMS = [50, 100, 200, 300]
-TEST_WORDS = ['economy', 'president', 'running']
+EMBEDDING_DIMS=[50, 100, 200, 300]
+TEST_WORDS=['economy', 'president', 'running']
 
 with open(os.path.join(DATA_DIR, "updated_vocab_document_dict.json")) as f:
     vocab_data = json.load(f)
 
 vocab = list(vocab_data.keys())
 word_to_idx = {w: i for i, w in enumerate(vocab)}
-
 with open(os.path.join(OUTPUT_DIR, "training_summary.pkl"), 'rb') as f:
     training_summary = pickle.load(f)
 
-all_losses = training_summary['loss_histories']
-all_times = training_summary['training_times']
+all_losses= training_summary['loss_histories']
+all_times= training_summary['training_times']
 best_config = {
     'window_size': training_summary['hyperparameters']['window_size'],
     'learning_rate': training_summary['hyperparameters']['learning_rate']
@@ -31,7 +30,6 @@ best_config = {
 embeddings = {}
 for d in EMBEDDING_DIMS:
     embeddings[d] = np.load(os.path.join(OUTPUT_DIR, f"glove_embeddings_d{d}.npy"))
-
 print("Create loss plot")
 
 plt.figure(figsize=(10, 6))
@@ -51,7 +49,6 @@ plot_file = os.path.join(OUTPUT_DIR, 'loss_curves.png')
 plt.savefig(plot_file, dpi=300)
 print(f"Saved {plot_file}")
 plt.close()
-
 print("\nFinding nearest neighbors (d=200)")
 
 def get_similar_words(embeddings, word, k=5):
@@ -126,20 +123,11 @@ with open(csv_file, 'w', newline='') as f:
 print(f"Saved {csv_file}")
 
 summary_data = {
-    'configuration': {
-        'window_size': best_config['window_size'],
-        'learning_rate': best_config['learning_rate'],
-        'iterations': 50,
-        'x_max': 100,
-        'alpha': 0.75,
-        'dimensions': EMBEDDING_DIMS,
-        'vocabulary_size': len(vocab),
-        'documents': training_summary['num_documents']
-    },
+    'configuration': {'window_size': best_config['window_size'],'learning_rate': best_config['learning_rate'],'iterations': 50,'x_max': 100,'alpha': 0.75,'dimensions': EMBEDDING_DIMS,
+        'vocabulary_size': len(vocab),'documents': training_summary['num_documents']},
     'results': {
         f'd{d}': {
-            'training_time_minutes': round(all_times[d]/60, 2),
-            'final_loss': float(all_losses[d][-1])
+            'training_time_minutes': round(all_times[d]/60, 2),'final_loss': float(all_losses[d][-1])
         } for d in EMBEDDING_DIMS
     }
 }

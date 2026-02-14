@@ -8,22 +8,22 @@ from collections import defaultdict
 from scipy.sparse import lil_matrix, csr_matrix
 from tqdm import tqdm
 
-DATA_DIR = "data"
-OUTPUT_DIR = "outputs"
+DATA_DIR= "data"
+OUTPUT_DIR= "outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-FIXED_DIM = 200
-FIXED_ITERATIONS = 50
-MAX_DOCUMENTS = 67093
-X_MAX = 100
-ALPHA = 0.75
+FIXED_DIM= 200
+FIXED_ITERATIONS= 50
+MAX_DOCUMENTS =67093
+X_MAX=100
+ALPHA=0.75
 
-WINDOW_SIZES = [5, 10, 15]
-LEARNING_RATES = [0.01, 0.05, 0.1]
+WINDOW_SIZES =[5, 10, 15]
+LEARNING_RATES =[0.01, 0.05, 0.1]
 
-print(f"Fixed dimension: {FIXED_DIM}")
+print(f"Fixed dimension:{FIXED_DIM}")
 print(f"Iterations: {FIXED_ITERATIONS}")
-print(f"Documents: {MAX_DOCUMENTS}")
+print(f"Documents:{MAX_DOCUMENTS}")
 print(f"Testing {len(WINDOW_SIZES)} windows {len(LEARNING_RATES)} learning rates")
 
 with open(os.path.join(DATA_DIR, "updated_vocab_document_dict.json")) as f:
@@ -37,7 +37,7 @@ def tokenize(text):
     return re.findall(r"\b\w+\b", text.lower())
 
 def get_documents(vocab_data, max_docs):
-    docs = defaultdict(list)
+    docs=defaultdict(list)
     for word, passages in vocab_data.items():
         for doc_id, text in passages:
             if doc_id < max_docs:
@@ -49,10 +49,10 @@ def get_documents(vocab_data, max_docs):
 def build_cooccurrence(docs, window, vocab, word_to_idx):
     print(f"Building cooccurrence matrix with window={window}")
     V = len(vocab)
-    cooc = lil_matrix((V, V), dtype=np.float32)
+    cooc=lil_matrix((V, V), dtype=np.float32)
     
     for doc in tqdm(docs, desc="Processing docs"):
-        tokens = [word_to_idx[w] for w in tokenize(doc) if w in word_to_idx]
+        tokens= [word_to_idx[w] for w in tokenize(doc) if w in word_to_idx]
         for i, wi in enumerate(tokens):
             for j in range(max(0, i - window), min(len(tokens), i + window + 1)):
                 if i != j:
@@ -76,7 +76,7 @@ class GloVe:
         self.gbc = np.ones_like(self.bc)
     
     def weight(self, x):
-        return (x / X_MAX) ** ALPHA if x < X_MAX else 1.0
+        return (x/X_MAX) ** ALPHA if x < X_MAX else 1.0
     
     def train(self, cooc, lr, iterations):
         coo = cooc.tocoo()
@@ -96,48 +96,48 @@ class GloVe:
                 dW = grad * self.Wc[j]
                 dWc = grad * self.W[i]
                 
-                self.gW[i] += dW ** 2
-                self.gWc[j] += dWc ** 2
-                self.gb[i] += grad ** 2
-                self.gbc[j] += grad ** 2
+                self.gW[i]+= dW ** 2
+                self.gWc[j]+= dWc ** 2
+                self.gb[i]+= grad ** 2
+                self.gbc[j]+= grad ** 2
                 
-                self.W[i] -= lr * dW / np.sqrt(self.gW[i])
-                self.Wc[j] -= lr * dWc / np.sqrt(self.gWc[j])
-                self.b[i] -= lr * grad / np.sqrt(self.gb[i])
-                self.bc[j] -= lr * grad / np.sqrt(self.gbc[j])
+                self.W[i]-= lr * dW / np.sqrt(self.gW[i])
+                self.Wc[j]-= lr * dWc / np.sqrt(self.gWc[j])
+                self.b[i]-= lr * grad / np.sqrt(self.gb[i])
+                self.bc[j]-= lr * grad / np.sqrt(self.gbc[j])
             
-            avg_loss = total_loss / len(pairs)
+            avg_loss=total_loss/len(pairs)
             losses.append(avg_loss)
             print(f"Epoch {it+1}: loss={avg_loss:.6f}")
         
         return losses
 
-docs = get_documents(vocab_data, MAX_DOCUMENTS)
+docs=get_documents(vocab_data, MAX_DOCUMENTS)
 
-results = []
+results=[]
 
 for window in WINDOW_SIZES:
-    cooc = build_cooccurrence(docs, window, vocab, word_to_idx)
+    cooc=build_cooccurrence(docs, window, vocab, word_to_idx)
     
     for lr in LEARNING_RATES:
         print(f"\nTesting window={window}, lr={lr}")
-        model = GloVe(len(vocab), FIXED_DIM)
-        t_start = time.time()
-        losses = model.train(cooc, lr, FIXED_ITERATIONS)
-        t_elapsed = time.time() - t_start
+        model=GloVe(len(vocab), FIXED_DIM)
+        t_start=time.time()
+        losses=model.train(cooc, lr, FIXED_ITERATIONS)
+        t_elapsed=time.time() - t_start
         
         results.append({'window': window,'lr': lr,'final_loss': losses[-1],'losses': losses,'time': t_elapsed })
         print(f"Final loss: {losses[-1]:.6f}, time: {t_elapsed:.1f}s")
 
 results.sort(key=lambda x: x['final_loss'])
-best = results[0]
+best=results[0]
 
 print("\nResults")
 print(f"{'Rank':<6} {'Window':<8} {'LR':<8} {'Loss':<12} {'Time(s)':<10}")
 for rank, r in enumerate(results, 1):
     print(f"{rank:<6} {r['window']:<8} {r['lr']:<8.2f} {r['final_loss']:<12.6f} {r['time']:<10.1f}")
 
-print(f"\nBest config: window={best['window']}, lr={best['lr']}, loss={best['final_loss']:.6f}")
+print(f"\nBest config: window={best['window']},lr={best['lr']}, loss={best['final_loss']:.6f}")
 
 with open(os.path.join(OUTPUT_DIR, "tuning_results.txt"), 'w') as f:
     f.write("Hyperparameter Tuning Results\n\n")
@@ -147,11 +147,11 @@ with open(os.path.join(OUTPUT_DIR, "tuning_results.txt"), 'w') as f:
     f.write(f"  Final loss: {best['final_loss']:.6f}\n\n")
     f.write("All Results:\n")
     for rank, r in enumerate(results, 1):
-        f.write(f"{rank}. window={r['window']}, lr={r['lr']:.2f}, loss={r['final_loss']:.6f}\n")
+        f.write(f"{rank}. window={r['window']}, lr={r['lr']:.2f},loss={r['final_loss']:.6f}\n")
 
-best_config = {
+best_config={
     'window_size': best['window'],
     'learning_rate': best['lr']
 }
-with open(os.path.join(OUTPUT_DIR, "best_config.pkl"), 'wb') as f:
+with open(os.path.join(OUTPUT_DIR,"best_config.pkl"),'wb') as f:
     pickle.dump(best_config, f)
